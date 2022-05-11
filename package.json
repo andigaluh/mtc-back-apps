@@ -1,0 +1,36 @@
+{
+  "name": "auth-jwt-mysql",
+  "version": "1.0.0",
+  "description": "NodeJS Authentication with JWT and MySQL",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "jwt",
+    "mysql",
+    "authentication"
+  ],
+  "author": "Andi Galuh",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "cryptr": "^6.0.2",
+    "dotenv": "^10.0.0",
+    "exceljs": "^4.3.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.3",
+    "mysql2": "^2.2.5",
+    "nodemailer": "^6.6.1",
+    "read-excel-file": "^4.0.6",
+    "sequelize": "^6.6.2"
+  }
+}
