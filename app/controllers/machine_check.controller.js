@@ -66,10 +66,12 @@ exports.create = async (req, res) => {
 
       if (machine_check_conditions.length > 0) {
         machine_check_conditions.map(async (values) => {
+          let comment_value = values.comment_value ? values.comment_value : "" ;
           var data_parts = {
             machine_check_id: createMachineCheck.id,
             parts_id: values.parts_id,
             status: values.status,
+            comment_value: comment_value,
           };
 
           const createMachineCheckCondition =

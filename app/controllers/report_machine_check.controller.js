@@ -179,7 +179,8 @@ exports.findOne = async (req, res) => {
               parts_name: valCondition.parts.name,
               parts_standard: valCondition.parts.standard,
               parts_method: valCondition.parts.method,
-              status: valCondition.status
+              status: valCondition.status,
+              comment_value: valCondition.comment_value,
             });
         })
     }
