@@ -17,7 +17,11 @@ module.exports = (sequelize, Sequelize) => {
     },
     supervisor_approval: {
       type: Sequelize.BOOLEAN,
-    }
+    },
+    status_update_parts: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
   });
 
   return Machine_check;

@@ -75,6 +75,10 @@ module.exports = (sequelize, Sequelize) => {
     status: {
       type: Sequelize.BOOLEAN,
     },
+    status_update_parts: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
   });
 
   return Report_machine_check;
