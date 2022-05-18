@@ -32,11 +32,11 @@ module.exports = (app) => {
   //router.put("/:id", [authJwt.verifyToken, authJwt.isAdmin], report_machine_check.update);
 
   // Update a Machine with id
-  /* router.put(
-    "/parts/:id",
-    [authJwt.verifyToken, authJwt.isAdmin],
-    report_machine_check.updateParts
-  ); */
+  router.put(
+    "/parts/:machine_check_id/:parts_id",
+    [authJwt.verifyToken],
+    report_machine_check.updatePartsCondition
+  ); 
 
   // Delete a Machine with id
   router.delete(
@@ -52,7 +52,7 @@ module.exports = (app) => {
     report_machine_check.deleteAll
   );
 
-  // Retrieve all Machines
+  router.get("/statusUpdated/:machine_check_id", [authJwt.verifyToken], report_machine_check.statusUpdatedParts)
   
 
   app.use("/api/report-machine-check", router);
