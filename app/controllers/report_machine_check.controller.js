@@ -519,7 +519,7 @@ exports.statusUpdatedParts = (req, res) => {
         statusUpdate,
       });
 
-      console.log(arrayData);
+      //console.log(arrayData);
       res.send(arrayData);
 
     })
