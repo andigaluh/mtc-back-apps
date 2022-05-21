@@ -20,11 +20,15 @@ module.exports = (sequelize, Sequelize) => {
         },
         expired_date: {
           type: Sequelize.DATE,
-          allowNull: true
+          allowNull: true,
         },
         status: {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
+        },
+        treatment: {
+          type: Sequelize.TEXT,
+          allowNull: true,
         },
       },
       {

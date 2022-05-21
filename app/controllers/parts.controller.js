@@ -18,6 +18,7 @@ exports.download = (req, res) => {
         qty:obj.qty,
         expired_date:obj.expired_date,
         status:obj.status,
+        treatment:obj.treatment,
         createdAt: obj.createdAt,
         updatedAt: obj.updatedAt,
       });
@@ -36,6 +37,7 @@ exports.download = (req, res) => {
       { header: "Qty", key: "qty", width: 10 },
       { header: "Expired Date", key: "expired_date", width: 10 },
       { header: "Status", key: "status", width: 10 },
+      { header: "Treatment", key: "treatment", width: 10 },
       { header: "CreatedAt", key: "createdAt", width: 10 },
       { header: "UpdatedAt", key: "updatedAt", width: 10 },
     ];
@@ -91,6 +93,7 @@ exports.create = (req, res) => {
     qty: req.body.qty,
     expired_date: req.body.expired_date,
     status: req.body.status ? req.body.status : false,
+    treatment: req.body.treatment,
   };
 
   // Save Parts in the database
@@ -126,7 +129,7 @@ exports.findAll = (req, res) => {
     condition.expired_date = { [Op.gte]: start_date };
   }
   
-  Parts.findAll({ where: condition })
+  Parts.findAll({ where: condition, order: [['id', 'DESC']] })
     .then((data) => {
       res.send(data);
     })
@@ -215,7 +218,7 @@ exports.deleteAll = (req, res) => {
     truncate: false,
   })
     .then((nums) => {
-      res.send({ message: `${nums} Partss were deleted successfully!` });
+      res.send({ message: `${nums} Parts were deleted successfully!` });
     })
     .catch((err) => {
       res.status(500).send({
