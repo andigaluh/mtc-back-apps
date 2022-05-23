@@ -63,7 +63,7 @@ exports.findProblemDiffTime = (req, res) => {
   })
     .then((data) => {
       let toolsData = [];
-      console.log(data);
+      //console.log(data);
       data.map((row) => {
         
         let dataRow = {
@@ -157,7 +157,7 @@ exports.statusMachineNG = (req, res) => {
     limit: 2,
   })
     .then((data) => {
-      console.log(data);
+      //console.log(data);
       res.send(data);
       //res.send(resultData);
     })
@@ -198,7 +198,7 @@ exports.statusMachineOK = (req, res) => {
     limit: 2,
   })
     .then((data) => {
-      console.log(data);
+      //console.log(data);
       res.send(data);
       //res.send(resultData);
     })

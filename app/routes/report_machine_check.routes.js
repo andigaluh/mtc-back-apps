@@ -7,6 +7,8 @@ module.exports = (app) => {
   // Create a new Machine
   //router.post("/", [authJwt.verifyToken, authJwt.isAdmin], report_machine_check.create);
 
+  router.get("/check_machine_summary", report_machine_check.CheckMachineSummary);
+
   router.get("/summary",  report_machine_check.cronjobSummary);
 
   router.get("/download", report_machine_check.download);
