@@ -9,12 +9,27 @@ const Tools = db.tools;
 const Parts = db.parts;
 const Problem_machine = db.problem_machine;
 const User = db.user;
+const Shift = db.shift
 const Op = db.Sequelize.Op;
 const excel = require("exceljs");
+
 const fn = db.Sequelize.fn;
 const literal = db.Sequelize.literal;
 const col = db.Sequelize.col;
 const Where = db.Sequelize.where;
+
+const dateToday = () => {
+  var today = new Date(),
+    month = "" + (today.getMonth() + 1),
+    day = "" + today.getDate(),
+    year = today.getFullYear();
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+
+  return [year, month, day].join("-");
+
+} 
+
 
 exports.findProblemDiffTime = (req, res) => {
   const start_date = req.query.start_date;
@@ -286,7 +301,7 @@ exports.alertParts = async (req, res) => {
         [Op.lt]: 5,
       },
     },
-    limit: 6,
+    limit: 5,
   })
     .then((data) => {
       //console.log(data);
@@ -308,7 +323,7 @@ exports.alertTools = async (req, res) => {
         [Op.lt]: 5,
       },
     },
-    limit: 6,
+    limit: 5,
   })
     .then((data) => {
       //console.log(data);
@@ -344,7 +359,8 @@ exports.totalProblemMachine = (req, res) => {
 
 exports.totalProblemMachineInMonth = (req, res) => {
   let now = new Date;
-  let thisMonth = now.getMonth();
+  let thisMonth = now.getMonth() + 1;
+  //console.log(thisMonth);
   Machine.findAll({
     attributes: {
       include: [
@@ -369,7 +385,8 @@ exports.totalProblemMachineInMonth = (req, res) => {
 
 exports.totalMinutesProblemMachine = (req, res) => {
   let now = new Date();
-  let thisMonth = now.getMonth();
+  let thisMonth = now.getMonth() + 1;
+  //console.log(thisMonth)
   Machine.findAll({
     attributes: {
       include: [
@@ -388,4 +405,112 @@ exports.totalMinutesProblemMachine = (req, res) => {
   });
 };
 
+exports.MachineTroubleTrending = (req, res) => {
+  Problem_machine.findAll({
+    attributes: [
+      [fn("COUNT", col("id")), "total_problem"],
+      [fn("MONTHNAME", col("start_problem")), "month"],
+      [fn("YEAR", col("start_problem")), "year"],
+    ],
+    group: [
+      fn("YEAR", col("start_problem")),
+      fn("MONTH", col("start_problem")),
+    ],
+    order: [
+      [fn("MONTH", col("start_problem")), "ASC"],
+      [fn("YEAR", col("start_problem"))],
+    ],
+    limit: 12,
+  })
+    .then((data) => {
+      //console.log(data);
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving problem machine.",
+      });
+    });
+};
 
+exports.DownTimeProblemMachineThisMonth = (req, res) => {
+  let now = new Date();
+  //let thisMonth = now.getMonth();
+  let thisMonth = now.getMonth() + 1;
+  //console.log(thisMonth);
+  Machine.findAll({
+    attributes: {
+      include: [
+        [
+          literal(`(
+                    SELECT SUM(TIMESTAMPDIFF( MINUTE, start_problem, end_problem ))
+                    FROM problem_machines AS problem_machines
+                    WHERE problem_machines.machine_id = machine.id
+                    AND MONTH(problem_machines.start_problem) = ${thisMonth}
+                )`),
+          "total_minutes_problem",
+        ],
+      ],
+    },
+  }).then((data) => {
+    //console.log(data)
+    res.send(data);
+  });
+};
+
+exports.TopFiveMachineProblem = (req, res) => {
+  Problem_machine.findAll({
+    attributes: [
+      [fn("COUNT", col("id")), "total_problem"],
+      ["machine_id", "machine_id"],
+      [
+        literal(`(
+                    SELECT name
+                    FROM machines AS machines
+                    WHERE machines.id = machine_id
+                )`),
+        "machine_name",
+      ],
+    ],
+    group: [["machine_id"]],
+    order: [[fn("COUNT", col("id")), "DESC"]],
+    limit: 5,
+  })
+    .then((data) => {
+      //console.log(data);
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message ||
+          "Some error occurred while retrieving problem machine.",
+      });
+    });
+}
+
+exports.TotalMachineCheck = async (req, res) => {
+  const today = dateToday();
+  const startDate = `${today} 00:00:00`;
+  const endDate = `${today} 23:59:59`;
+  const countMachine = await Machine.count();
+  const countShift = await Shift.count();
+  const totalMachineCheckInDay = Math.floor(countMachine * countShift);
+  const totalFinishMachineCheckInDay = await Report_machine_check.count({
+    where: {
+      inspection_date: {
+        [Op.between]: [startDate, endDate],
+      },
+    },
+  });
+  const totalUnFinishMachineCheckInDay = Math.floor(totalMachineCheckInDay - totalFinishMachineCheckInDay);
+  res.send({
+    today,
+    countMachine,
+    countShift,
+    totalMachineCheckInDay,
+    totalFinishMachineCheckInDay,
+    totalUnFinishMachineCheckInDay,
+  });
+  //console.log(today)
+}

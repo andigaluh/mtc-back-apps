@@ -171,7 +171,7 @@ exports.findAll = (req, res) => {
       {
         model: Parts,
         as: "parts",
-        attributes: ["id", "name"],
+        attributes: ["id", "name", "expired_date"],
       },
     ],
   })
@@ -183,6 +183,8 @@ exports.findAll = (req, res) => {
           id: row.id,
           machine: row.machine.name,
           parts: row.parts.name,
+          parts_expired: row.parts.expired_date,
+          parts_id: row.parts.id,
           user: row.user.name,
           problem: row.problem,
           counter_measure: row.counter_measure,

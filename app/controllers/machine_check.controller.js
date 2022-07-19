@@ -131,11 +131,11 @@ exports.create = async (req, res) => {
       }
 
       
-      sequelize.query("CALL cp_report_machine_check()").then((v) => {
+      //sequelize.query("CALL cp_report_machine_check()").then((v) => {
         res.send({
           message: "Create machine check success",
         });
-      });
+      //});
     } catch (error) {
       console.log(error);
     }
@@ -199,11 +199,11 @@ exports.update = (req, res) => {
   })
     .then((num) => {
       if (num == 1) {
-        sequelize.query("CALL cp_report_machine_check()").then((v) => {
+        //sequelize.query("CALL cp_report_machine_check()").then((v) => {
           res.send({
             message: "Approval machine-check success.",
           });
-        });
+        //});
         
       } else {
         res.send({
@@ -217,3 +217,4 @@ exports.update = (req, res) => {
       });
     });
 };
+

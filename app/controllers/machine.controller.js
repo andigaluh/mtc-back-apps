@@ -169,7 +169,9 @@ exports.updateParts = (req, res) => {
   const id = req.params.id;
 
   Machine.findByPk(id).then((machine) => {
-    if (req.body.parts_id) {
+    const parts_id = req.body.parts_id;
+    //console.log(`jumlah parts_id = ${parts_id.length}`)
+    if (parts_id.length > 0) {
       Parts.findAll({
         where: {
           name: {
@@ -177,42 +179,48 @@ exports.updateParts = (req, res) => {
           },
         },
       }).then((parts) => {
-        /* res.send({
-          message: "Create machine-parts no error backend",
-        }); */
         machine.setParts(parts).then(() => {
           res.send({
-            message: "Create machine-parts success"
+            message: "Create machine-parts success",
           });
-        })
+        });
       });
+    } else {
+
+    Machine_parts.destroy({
+      where: { machine_id: id },
+    }).then((numParts) => {
+      res.send({
+        message: "Create machine-parts success",
+      });
+    }).catch((error) => {
+      res.status(500).send({
+        message: "Could not delete Machine parts with machine_id=" + id,
+      });
+    });
+
     }
+
   });
 };
 
-// Delete a Machine with the specified id in the request
-exports.delete = (req, res) => {
+exports.delete = async (req, res) => {
   const id = req.params.id;
+  const selectMachineParts = await Machine_parts.findAll({where : { machine_id : id}});
+  if (selectMachineParts.length > 0) {
+    const delMachineParts = await Machine_parts.destroy({where : { machine_id : id }});
+  }
 
-  Machine.destroy({
-    where: { id: id },
-  })
-    .then((num) => {
-      if (num == 1) {
-        res.send({
-          message: "Delete machine success.",
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Machine with id=${id}. Maybe Machine was not found!`,
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Could not delete Machine with id=" + id,
-      });
+  const delMachine = await Machine.destroy({ where: { id } });
+  if (delMachine > 0) {
+    res.send({
+      message: "Delete machine success.",
     });
+  } else {
+    res.send({
+      message: `Cannot delete Machine with id=${id}. Maybe Machine was not found!`,
+    });
+  }
 };
 
 // Delete all Machine from the database.

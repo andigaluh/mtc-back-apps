@@ -88,74 +88,76 @@ exports.download = (req, res) => {
 
 // Retrieve all Machine from the database.
 exports.findAll = (req, res) => {
-  const machine_name = req.query.title;
-  const start_date = req.query.start_date;
-  const end_date = req.query.end_date;
-  let condition = {};
+  sequelize.query("CALL cp_report_machine_check()").then((v) => {
+    const machine_name = req.query.title;
+    const start_date = req.query.start_date;
+    const end_date = req.query.end_date;
+    let condition = {};
 
-  if (machine_name) {
-    condition.machine_name = { [Op.like]: `%${machine_name}%` };
-  }
+    if (machine_name) {
+      condition.machine_name = { [Op.like]: `%${machine_name}%` };
+    }
 
-  if (start_date && end_date) {
-    condition.date = { [Op.gte]: start_date, [Op.lte]: end_date };
-  } else if (start_date) {
-    condition.date = { [Op.gte]: start_date };
-  }
+    if (start_date && end_date) {
+      condition.date = { [Op.gte]: start_date, [Op.lte]: end_date };
+    } else if (start_date) {
+      condition.date = { [Op.gte]: start_date };
+    }
 
-  Report_machine_check.findAll({
-    where: condition,
-    order: [["machine_check_id", "DESC"]],
-  })
-    .then((data) => {
-      let arrayData = [];
-      data.map((item) => {
-        var status = true;
-      
-        status =
-          item.jumlah_parts_ng && item.jumlah_parts_ng > 0 ? false : true;
+    Report_machine_check.findAll({
+      where: condition,
+      order: [["machine_check_id", "DESC"]],
+    })
+      .then((data) => {
+        let arrayData = [];
+        data.map((item) => {
+          var status = true;
 
-        //const statusUpdate = customStatusUpdate(item.machine_check_id);
+          status =
+            item.jumlah_parts_ng && item.jumlah_parts_ng > 0 ? false : true;
 
-        //console.log(JSON.stringify(statusUpdate, null, 2));
+          //const statusUpdate = customStatusUpdate(item.machine_check_id);
 
-        arrayData.push({
-          createdAt: item.createdAt,
-          date: item.date,
-          inspection_approval: item.inspection_approval,
-          inspection_date: item.inspection_date,
-          inspection_id: item.inspection_id,
-          inspection_name: item.inspection_name,
-          inspection_username: item.inspection_username,
-          jumlah_need_parts: item.jumlah_need_parts,
-          jumlah_parts_ng: item.jumlah_parts_ng,
-          jumlah_parts_ok: item.jumlah_parts_ok,
-          jumlah_problems: item.jumlah_problems,
-          machine_check_id: item.machine_check_id,
-          machine_code: item.machine_code,
-          machine_id: item.machine_id,
-          machine_name: item.machine_name,
-          shift_id: item.shift_id,
-          shift_name: item.shift_name,
-          supervisor_approval: item.supervisor_approval,
-          supervisor_date: item.supervisor_date,
-          supervisor_id: item.supervisor_id,
-          supervisor_name: item.supervisor_name,
-          time: item.time,
-          total_parts: item.total_parts,
-          status: status,
-          status_update_parts: item.status_update_parts,
+          //console.log(JSON.stringify(statusUpdate, null, 2));
+
+          arrayData.push({
+            createdAt: item.createdAt,
+            date: item.date,
+            inspection_approval: item.inspection_approval,
+            inspection_date: item.inspection_date,
+            inspection_id: item.inspection_id,
+            inspection_name: item.inspection_name,
+            inspection_username: item.inspection_username,
+            jumlah_need_parts: item.jumlah_need_parts,
+            jumlah_parts_ng: item.jumlah_parts_ng,
+            jumlah_parts_ok: item.jumlah_parts_ok,
+            jumlah_problems: item.jumlah_problems,
+            machine_check_id: item.machine_check_id,
+            machine_code: item.machine_code,
+            machine_id: item.machine_id,
+            machine_name: item.machine_name,
+            shift_id: item.shift_id,
+            shift_name: item.shift_name,
+            supervisor_approval: item.supervisor_approval,
+            supervisor_date: item.supervisor_date,
+            supervisor_id: item.supervisor_id,
+            supervisor_name: item.supervisor_name,
+            time: item.time,
+            total_parts: item.total_parts,
+            status: status,
+            status_update_parts: item.status_update_parts,
+          });
+        });
+        //console.log(arrayData);
+        res.send(arrayData);
+      })
+      .catch((err) => {
+        res.status(500).send({
+          message:
+            err.message || "Some error occurred while retrieving machine.",
         });
       });
-      //console.log(arrayData);
-      res.send(arrayData);
-        
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving machine.",
-      });
-    });
+  });
 };
 
 const customStatusUpdate = async (machine_check_id) => {
@@ -427,11 +429,11 @@ exports.updatePartsCondition = (req, res) => {
     .then((num) => {
       if (num == 1) {
         Machine_check.update({status_update_parts: true}, { where: { id: machine_check_id }}).then((response) => {
-          sequelize.query("CALL cp_report_machine_check()").then((v) => {
+          //sequelize.query("CALL cp_report_machine_check()").then((v) => {
             res.send({
               message: `Update success. [check_id: ${machine_check_id}; parts_id: ${parts_id}]`,
             });
-          });
+          //});
         })
           
       } else {
@@ -521,24 +523,25 @@ exports.CheckMachineSummary = async (req, res) => {
       ["name", "name"],
       [
         literal(
-          "IF((select shift_id from report_machine_checks where report_machine_checks.machine_id = id and report_machine_checks.shift_id = 1 and DATE(date) = DATE(now())) >0, TRUE, FALSE)"
+          "IF((select shift_id from report_machine_checks where report_machine_checks.machine_id = id and report_machine_checks.shift_id = 1 and DATE(date) = DATE(now()) limit 1) >0, TRUE, FALSE)"
         ),
         "shift_1",
       ],
       [
         literal(
-          "IF((select shift_id from report_machine_checks where report_machine_checks.machine_id = id and report_machine_checks.shift_id = 2 and DATE(date) = DATE(now())) >0, TRUE, FALSE)"
+          "IF((select shift_id from report_machine_checks where report_machine_checks.machine_id = id and report_machine_checks.shift_id = 2 and DATE(date) = DATE(now()) limit 1) >0, TRUE, FALSE)"
         ),
         "shift_2",
       ],
       [
         literal(
-          "IF((select shift_id from report_machine_checks where report_machine_checks.machine_id = id and report_machine_checks.shift_id = 3 and DATE(date) = DATE(now())) >0, TRUE, FALSE)"
+          "IF((select shift_id from report_machine_checks where report_machine_checks.machine_id = id and report_machine_checks.shift_id = 3 and DATE(date) = DATE(now()) limit 1) >0, TRUE, FALSE)"
         ),
         "shift_3",
       ],
     ],
     order: [["code", "ASC"]],
+    //limit: 5,
   });
 
   res.send({

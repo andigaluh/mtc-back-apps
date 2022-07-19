@@ -25,5 +25,19 @@ module.exports = (app) => {
 
     router.get("/total_minutes_problem", dashboard.totalMinutesProblemMachine);
 
+    router.get("/problem_machine_trending", dashboard.MachineTroubleTrending);
+    
+    router.get(
+      "/downtime_problem_machine_this_month",
+      dashboard.DownTimeProblemMachineThisMonth
+    );
+
+    router.get(
+      "/top_five_machine_problem",
+      dashboard.TopFiveMachineProblem
+    );
+
+    router.get("/total_machine_check_status", dashboard.TotalMachineCheck);
+
     app.use("/api/dashboard", router);
 };
