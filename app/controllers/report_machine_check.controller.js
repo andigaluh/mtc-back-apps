@@ -122,6 +122,7 @@ exports.findAll = (req, res) => {
 
           arrayData.push({
             createdAt: item.createdAt,
+            no_dokumen: item.no_dokumen,
             date: item.date,
             inspection_approval: item.inspection_approval,
             inspection_date: item.inspection_date,
@@ -261,6 +262,7 @@ exports.findOne = async (req, res) => {
 
     var data_resp = {
       machine_name: ReportMachineCheck.machine_name,
+      no_dokumen: ReportMachineCheck.no_dokumen,
       inspection_name: ReportMachineCheck.inspection_name,
       shift_name: ReportMachineCheck.shift_name,
       date: ReportMachineCheck.date,

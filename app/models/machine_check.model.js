@@ -20,7 +20,10 @@ module.exports = (sequelize, Sequelize) => {
     },
     status_update_parts: {
       type: Sequelize.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
+    },
+    no_dokumen: {
+      type: Sequelize.STRING,
     },
   });
 

@@ -1,5 +1,6 @@
 const db = require("../models");
 const Machine = db.machine;
+const Machine_check = db.machine_check;
 const Parts = db.parts;
 const Machine_parts = db.machine_parts;
 const Op = db.Sequelize.Op;
@@ -95,7 +96,7 @@ exports.findOne = (req, res) => {
               "machine_id",
               "parts_id"
             ],
-          }).then((machine_parts) => {
+          }).then( async (machine_parts) => {
             //console.log(JSON.stringify(machine_parts,null,2));
             for (let i = 0; i < machine_parts.length; i++) {
               machineParts.push({
@@ -105,6 +106,8 @@ exports.findOne = (req, res) => {
               });
             }
 
+
+            const maxIdMachineCheck = await Machine_check.max('id');
             //console.log(machineParts);
 
             const dataResponse = {
@@ -118,6 +121,7 @@ exports.findOne = (req, res) => {
               updatedAt: data.updatedAt,
               parts: spareparts,
               machineParts: machineParts,
+              maxIdMachineCheck: maxIdMachineCheck,
             };
 
             //console.log(dataResponse);

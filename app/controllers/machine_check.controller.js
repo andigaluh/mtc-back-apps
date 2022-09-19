@@ -54,8 +54,11 @@ exports.create = async (req, res) => {
       inspection_approval: req.body.inspection_approval,
       machine_id: req.body.machine_id,
       shift_id: req.body.shift_id,
-      supervisor_id: req.body.supervisor_id
+      supervisor_id: req.body.supervisor_id,
+      no_dokumen: req.body.no_dokumen,
     };
+
+    console.log(req.body.no_dokumen);
 
     let createMachineCheck = await Machine_check.create(machine_check);
     try {

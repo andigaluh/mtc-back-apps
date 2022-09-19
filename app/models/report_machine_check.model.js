@@ -4,6 +4,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       primaryKey: true,
     },
+    no_dokumen: {
+      type: Sequelize.STRING,
+    },
     machine_id: {
       type: Sequelize.INTEGER,
     },
