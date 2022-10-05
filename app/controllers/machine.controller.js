@@ -81,6 +81,7 @@ exports.findOne = (req, res) => {
                 "name" : parts[i].name,
                 "standard" : parts[i].standard,
                 "method" : parts[i].method,
+                "description" : parts[i].description,
               }
             );
           }

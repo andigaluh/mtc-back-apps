@@ -88,77 +88,90 @@ exports.download = (req, res) => {
 
 // Retrieve all Machine from the database.
 exports.findAll = (req, res) => {
-  sequelize.query("CALL cp_report_machine_check()").then((v) => {
-    const machine_name = req.query.title;
-    const start_date = req.query.start_date;
-    const end_date = req.query.end_date;
-    let condition = {};
+  Machine_check.max('id').then((mc) => {
+    //console.log(mc)
+    Report_machine_check.max('machine_check_id').then( async (rmc) => {
+      //console.log(rmc)
+      if ( mc != rmc) {
+        const v = await sequelize.query("CALL cp_report_machine_check()");
+      } 
+      //sequelize.query("CALL cp_report_machine_check()").then((v) => {
+        const machine_name = req.query.title;
+        const start_date = req.query.start_date;
+        const end_date = req.query.end_date;
+        let condition = {};
 
-    if (machine_name) {
-      condition.machine_name = { [Op.like]: `%${machine_name}%` };
-    }
+        if (machine_name) {
+          condition.machine_name = { [Op.like]: `%${machine_name}%` };
+        }
 
-    if (start_date && end_date) {
-      condition.date = { [Op.gte]: start_date, [Op.lte]: end_date };
-    } else if (start_date) {
-      condition.date = { [Op.gte]: start_date };
-    }
+        if (start_date && end_date) {
+          condition.date = {
+            [Op.gte]: start_date,
+            [Op.lte]: end_date,
+          };
+        } else if (start_date) {
+          condition.date = { [Op.gte]: start_date };
+        }
 
-    Report_machine_check.findAll({
-      where: condition,
-      order: [["machine_check_id", "DESC"]],
-    })
-      .then((data) => {
-        let arrayData = [];
-        data.map((item) => {
-          var status = true;
+        Report_machine_check.findAll({
+          where: condition,
+          order: [["machine_check_id", "DESC"]],
+        })
+          .then((data) => {
+            let arrayData = [];
+            data.map((item) => {
+              var status = true;
 
-          status =
-            item.jumlah_parts_ng && item.jumlah_parts_ng > 0 ? false : true;
-
-          //const statusUpdate = customStatusUpdate(item.machine_check_id);
-
-          //console.log(JSON.stringify(statusUpdate, null, 2));
-
-          arrayData.push({
-            createdAt: item.createdAt,
-            no_dokumen: item.no_dokumen,
-            date: item.date,
-            inspection_approval: item.inspection_approval,
-            inspection_date: item.inspection_date,
-            inspection_id: item.inspection_id,
-            inspection_name: item.inspection_name,
-            inspection_username: item.inspection_username,
-            jumlah_need_parts: item.jumlah_need_parts,
-            jumlah_parts_ng: item.jumlah_parts_ng,
-            jumlah_parts_ok: item.jumlah_parts_ok,
-            jumlah_problems: item.jumlah_problems,
-            machine_check_id: item.machine_check_id,
-            machine_code: item.machine_code,
-            machine_id: item.machine_id,
-            machine_name: item.machine_name,
-            shift_id: item.shift_id,
-            shift_name: item.shift_name,
-            supervisor_approval: item.supervisor_approval,
-            supervisor_date: item.supervisor_date,
-            supervisor_id: item.supervisor_id,
-            supervisor_name: item.supervisor_name,
-            time: item.time,
-            total_parts: item.total_parts,
-            status: status,
-            status_update_parts: item.status_update_parts,
+              status =
+                item.jumlah_parts_ng && item.jumlah_parts_ng > 0
+                  ? false
+                  : true;
+                  
+              arrayData.push({
+                createdAt: item.createdAt,
+                no_dokumen: item.no_dokumen,
+                date: item.date,
+                inspection_approval: item.inspection_approval,
+                inspection_date: item.inspection_date,
+                inspection_id: item.inspection_id,
+                inspection_name: item.inspection_name,
+                inspection_username: item.inspection_username,
+                jumlah_need_parts: item.jumlah_need_parts,
+                jumlah_parts_ng: item.jumlah_parts_ng,
+                jumlah_parts_ok: item.jumlah_parts_ok,
+                jumlah_problems: item.jumlah_problems,
+                machine_check_id: item.machine_check_id,
+                machine_code: item.machine_code,
+                machine_id: item.machine_id,
+                machine_name: item.machine_name,
+                shift_id: item.shift_id,
+                shift_name: item.shift_name,
+                supervisor_approval: item.supervisor_approval,
+                supervisor_date: item.supervisor_date,
+                supervisor_id: item.supervisor_id,
+                supervisor_name: item.supervisor_name,
+                time: item.time,
+                total_parts: item.total_parts,
+                status: status,
+                status_update_parts: item.status_update_parts,
+              });
+            });
+            res.send(arrayData);
+          })
+          .catch((err) => {
+            res.status(500).send({
+              message:
+                err.message ||
+                "Some error occurred while retrieving machine.",
+            });
           });
-        });
-        //console.log(arrayData);
-        res.send(arrayData);
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving machine.",
-        });
-      });
+      //});
+    });
   });
+
+  
+  
 };
 
 const customStatusUpdate = async (machine_check_id) => {
@@ -201,7 +214,7 @@ exports.findOne = async (req, res) => {
         {
           model: Parts,
           as: "parts",
-          attributes: ["name", "standard", "method"],
+          attributes: ["name", "standard", "method", "description"],
         },
       ],
     });
@@ -213,6 +226,7 @@ exports.findOne = async (req, res) => {
           parts_name: valCondition.parts.name,
           parts_standard: valCondition.parts.standard,
           parts_method: valCondition.parts.method,
+          parts_description: valCondition.parts.description,
           status: valCondition.status,
           comment_value: valCondition.comment_value,
         });

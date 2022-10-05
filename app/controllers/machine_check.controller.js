@@ -9,6 +9,7 @@ const Notif = db.notif;
 const Machine_check_approval = db.machine_check_approval;
 const User = db.user;
 const Op = db.Sequelize.Op;
+const Report_machine_check = db.report_machine_check;
 
 // Create and Save a new Machine
 exports.create = async (req, res) => {
@@ -200,8 +201,18 @@ exports.update = (req, res) => {
   Machine_check.update(req.body, {
     where: { id: id },
   })
-    .then((num) => {
+    .then( async (num) => {
       if (num == 1) {
+        //console.log(req.body);
+        const spvName = await User.findByPk(req.body.supervisor_id);
+        const v = await Report_machine_check.update({
+          supervisor_date: req.body.supervisor_date,
+          supervisor_approval: req.body.supervisor_approval,
+          supervisor_id: req.body.supervisor_id,
+          supervisor_name : spvName.name,
+        }, {
+          where: { machine_check_id: id}
+        });
         //sequelize.query("CALL cp_report_machine_check()").then((v) => {
           res.send({
             message: "Approval machine-check success.",
